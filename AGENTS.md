@@ -1,6 +1,6 @@
 # Contesto del progetto
 
-Questo repository contiene una piccola applicazione web di calendario mensile in italiano. L'intera applicazione vive in `index.html`: markup, stili CSS e JavaScript non hanno dipendenze esterne e non richiedono una fase di build.
+Questo repository contiene una piccola applicazione web di calendario mensile in italiano. Markup, stili CSS e JavaScript sono separati rispettivamente in `index.html`, `styles.css` e `app.js`; non hanno dipendenze esterne e non richiedono una fase di build.
 
 ## Funzionalità
 
@@ -13,7 +13,9 @@ Questo repository contiene una piccola applicazione web di calendario mensile in
 
 ## Struttura tecnica
 
-- `index.html`: applicazione completa e unico file eseguibile.
+- `index.html`: struttura HTML e riferimenti ai file CSS e JavaScript.
+- `styles.css`: presentazione, layout responsive e animazioni.
+- `app.js`: logica del calendario, gestione delle note e persistenza locale.
 - `README.md`: documentazione per utilizzo, sviluppo e manutenzione.
 - Non sono presenti package manager, framework, backend, test automatici o asset esterni.
 - Le date salvate usano chiavi locali nel formato `YYYY-MM-DD`; il valore associato è una stringa di massimo 500 caratteri.
@@ -21,7 +23,7 @@ Questo repository contiene una piccola applicazione web di calendario mensile in
 
 ## Indicazioni per le modifiche
 
-- Conservare l'approccio senza dipendenze e single-file, salvo richiesta esplicita contraria.
+- Conservare l'approccio senza dipendenze e la separazione tra HTML, CSS e JavaScript, salvo richiesta esplicita contraria.
 - Non cambiare la chiave o il formato di `localStorage` senza prevedere una migrazione, per non perdere le note esistenti.
 - Usare i metodi locali di `Date` per generare le chiavi: la semantica corrente è quella del giorno nel fuso locale dell'utente.
 - Inserire il testo delle note con `textContent`, mai con `innerHTML`, per evitare injection di markup.
