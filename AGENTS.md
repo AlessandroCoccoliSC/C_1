@@ -1,6 +1,6 @@
 # Contesto del progetto
 
-Questo repository contiene una piccola applicazione web di calendario mensile in italiano. Markup, stili CSS e JavaScript sono separati rispettivamente in `index.html`, `styles.css` e `app.js`; non hanno dipendenze esterne e non richiedono una fase di build.
+Questo repository contiene una piccola applicazione web di calendario mensile in italiano. Il frontend si trova nella cartella `frontend/`; markup, stili CSS e JavaScript sono separati rispettivamente in `frontend/index.html`, `frontend/styles.css` e `frontend/app.js`. Non hanno dipendenze esterne e non richiedono una fase di build. La cartella `backend/` è attualmente vuota e riservata a sviluppi futuri.
 
 ## Funzionalità
 
@@ -13,11 +13,12 @@ Questo repository contiene una piccola applicazione web di calendario mensile in
 
 ## Struttura tecnica
 
-- `index.html`: struttura HTML e riferimenti ai file CSS e JavaScript.
-- `styles.css`: presentazione, layout responsive e animazioni.
-- `app.js`: logica del calendario, gestione delle note e persistenza locale.
+- `frontend/index.html`: struttura HTML e riferimenti ai file CSS e JavaScript.
+- `frontend/styles.css`: presentazione, layout responsive e animazioni.
+- `frontend/app.js`: logica del calendario, gestione delle note e persistenza locale.
+- `backend/`: cartella attualmente vuota, riservata a eventuali componenti server futuri.
 - `README.md`: documentazione per utilizzo, sviluppo e manutenzione.
-- Non sono presenti package manager, framework, backend, test automatici o asset esterni.
+- Non sono presenti package manager, framework, un'implementazione backend, test automatici o asset esterni.
 - Le date salvate usano chiavi locali nel formato `YYYY-MM-DD`; il valore associato è una stringa di massimo 500 caratteri.
 - La lingua e la formattazione delle date sono impostate su `it-IT`.
 
@@ -33,4 +34,4 @@ Questo repository contiene una piccola applicazione web di calendario mensile in
 
 ## Avvio e verifica
 
-Per una prova rapida aprire `index.html` in un browser moderno. Se il browser applica restrizioni alle pagine `file://`, servire la cartella con un server HTTP statico locale. Non esistono al momento comandi di build o test dedicati.
+Per una prova rapida aprire `frontend/index.html` in un browser moderno. Se il browser applica restrizioni alle pagine `file://`, servire la root con un server HTTP statico locale e aprire `/frontend/`, oppure servire direttamente la cartella `frontend/`. Non esistono al momento comandi di build o test dedicati.

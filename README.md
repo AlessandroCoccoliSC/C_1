@@ -14,7 +14,7 @@ Applicazione web leggera per consultare un calendario mensile e associare una no
 
 ## Avvio
 
-Il progetto non richiede build. È sufficiente aprire [`index.html`](./index.html) con un browser moderno.
+Il progetto non richiede build. È sufficiente aprire [`frontend/index.html`](./frontend/index.html) con un browser moderno.
 
 In alternativa, si può avviare un server statico dalla root del repository. Per esempio, se Python è installato:
 
@@ -22,7 +22,15 @@ In alternativa, si può avviare un server statico dalla root del repository. Per
 python -m http.server 8000
 ```
 
-Poi visitare `http://localhost:8000`.
+Poi visitare `http://localhost:8000/frontend/`.
+
+In alternativa, si può avviare il server direttamente dalla cartella del frontend:
+
+```bash
+python -m http.server 8000 --directory frontend
+```
+
+In questo caso l'applicazione è disponibile su `http://localhost:8000`.
 
 ## Utilizzo
 
@@ -55,14 +63,16 @@ I dati non vengono sincronizzati tra browser o dispositivi. La cancellazione dei
 
 ```text
 .
-|-- index.html   # struttura HTML dell'applicazione
-|-- styles.css   # stili, layout responsive e animazioni
-|-- app.js       # logica del calendario e persistenza locale
-|-- AGENTS.md    # contesto e indicazioni per gli agenti di sviluppo
-`-- README.md    # documentazione del progetto
+|-- frontend/
+|   |-- index.html   # struttura HTML dell'applicazione
+|   |-- styles.css   # stili, layout responsive e animazioni
+|   `-- app.js       # logica del calendario e persistenza locale
+|-- backend/         # cartella riservata al backend, attualmente vuota
+|-- AGENTS.md        # contesto e indicazioni per gli agenti di sviluppo
+`-- README.md        # documentazione del progetto
 ```
 
-L'applicazione resta priva di dipendenze e non richiede una fase di build. La logica in `app.js` è racchiusa in una IIFE e non espone variabili globali. La griglia contiene sempre 42 celle, così da coprire sei settimane complete; i giorni esterni al mese visibile sono mostrati con uno stile attenuato ma restano selezionabili.
+L'applicazione resta priva di dipendenze e non richiede una fase di build. La logica in `frontend/app.js` è racchiusa in una IIFE e non espone variabili globali. La griglia contiene sempre 42 celle, così da coprire sei settimane complete; i giorni esterni al mese visibile sono mostrati con uno stile attenuato ma restano selezionabili.
 
 ## Tecnologie
 
