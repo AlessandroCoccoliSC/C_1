@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#f7f8fc">
+  <title>Il mio calendario</title>
+  <style>
+    :root {
+      --blue: #1a73e8;
+      --blue-dark: #1558b0;
+      --blue-soft: #e8f0fe;
+      --red: #d93025;
+      --ink: #202124;
+      --muted: #5f6368;
+      --line: #e1e4e8;
+      --surface: #ffffff;
+      --background: #f7f8fc;
+      --shadow: 0 18px 48px rgba(30, 45, 70, 0.14);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-width: 320px;
+      min-height: 100vh;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 8% 2%, rgba(26, 115, 232, 0.08), transparent 26rem),
+        var(--background);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    button, textarea { font: inherit; }
+    button { -webkit-tap-highlight-color: transparent; }
+
+    .app {
+      width: min(1500px, 100%);
+      min-height: 100vh;
+      margin: 0 auto;
+      padding: 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      min-height: 58px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      min-width: 230px;
+    }
+
+    .brand-mark {
+      position: relative;
+      width: 40px;
+      height: 40px;
+      border-radius: 9px;
+      display: grid;
+      place-items: center;
+      color: white;
+      background: var(--blue);
+      box-shadow: 0 6px 16px rgba(26, 115, 232, 0.25);
+      font-size: 19px;
+      font-weight: 750;
+    }
+
+    .brand-mark::before {
+      content: "";
+      position: absolute;
+      inset: 0 0 auto;
+      height: 9px;
+      border-radius: 9px 9px 0 0;
+      background: #ea4335;
+    }
+
+    .brand-text { font-size: 21px; font-weight: 650; letter-spacing: -0.4px; }
+    .brand-text span { color: var(--muted); font-weight: 400; }
+
+    .toolbar {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .month-title {
+      min-width: 200px;
+      margin: 0 0 0 10px;
+      font-size: clamp(20px, 2.2vw, 27px);
+      font-weight: 500;
+      text-transform: capitalize;
+      letter-spacing: -0.6px;
+    }
+
+    .btn {
+      height: 40px;
+      border: 1px solid #dadce0;
+      border-radius: 10px;
+      padding: 0 16px;
+      color: #3c4043;
+      background: var(--surface);
+      cursor: pointer;
+      transition: background 140ms ease, border-color 140ms ease, transform 140ms ease;
+    }
+
+    .btn:hover { background: #f1f3f4; border-color: #c7cacf; }
+    .btn:active { transform: scale(0.97); }
+    .btn:focus-visible, .day:focus-visible, .icon-btn:focus-visible { outline: 3px solid rgba(26, 115, 232, 0.25); outline-offset: 2px; }
+
+    .icon-btn {
+      width: 40px;
+      height: 40px;
+      border: 0;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      color: var(--muted);
+      background: transparent;
+      cursor: pointer;
+      font-size: 25px;
+      line-height: 1;
+    }
+
+    .icon-btn:hover { background: #e9ebef; }
+
+    .storage-badge {
+      margin-left: auto;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    .storage-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #34a853;
+      box-shadow: 0 0 0 4px rgba(52, 168, 83, 0.12);
+    }
+
+    .calendar-shell {
+      flex: 1;
+      min-height: 650px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      overflow: hidden;
+      background: var(--surface);
+      box-shadow: 0 8px 32px rgba(40, 54, 78, 0.07);
+    }
+
+    .weekdays, .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+    }
+
+    .weekdays {
+      height: 45px;
+      border-bottom: 1px solid var(--line);
+      background: #fbfcfe;
+    }
+
+    .weekday {
+      display: grid;
+      place-items: center;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+    }
+
+    .weekday.short { display: none; }
+
+    .calendar-grid {
+      height: calc(100% - 45px);
+      min-height: 605px;
+      grid-template-rows: repeat(6, minmax(95px, 1fr));
+    }
+
+    .day {
+      position: relative;
+      min-width: 0;
+      padding: 8px;
+      border: 0;
+      border-right: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+      color: var(--ink);
+      background: var(--surface);
+      text-align: left;
+      cursor: pointer;
+      overflow: hidden;
+    }
+
+    .day:nth-child(7n) { border-right: 0; }
+    .day:nth-last-child(-n + 7) { border-bottom: 0; }
+    .day:hover { background: #f8faff; }
+    .day.outside { color: #a6aab0; background: #fafbfc; }
+    .day.outside .note-preview { opacity: 0.62; }
+
+    .day-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 5px;
+      min-height: 29px;
+    }
+
+    .day-number {
+      width: 29px;
+      height: 29px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-size: 13px;
+      font-weight: 550;
+    }
+
+    .day.today .day-number { color: white; background: var(--blue); font-weight: 750; }
+
+    .note-count {
+      width: 7px;
+      height: 7px;
+      margin-right: 5px;
+      border-radius: 50%;
+      background: var(--blue);
+      box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.1);
+    }
+
+    .note-preview {
+      margin-top: 6px;
+      padding: 6px 8px;
+      border-left: 3px solid var(--blue);
+      border-radius: 4px;
+      color: #174ea6;
+      background: var(--blue-soft);
+      font-size: 12px;
+      line-height: 1.35;
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow-wrap: anywhere;
+    }
+
+    .dialog-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 20;
+      padding: 20px;
+      display: grid;
+      place-items: center;
+      background: rgba(20, 27, 38, 0.42);
+      backdrop-filter: blur(4px);
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 180ms ease, visibility 180ms ease;
+    }
+
+    .dialog-backdrop.open { opacity: 1; visibility: visible; }
+
+    .dialog {
+      width: min(500px, 100%);
+      border-radius: 18px;
+      padding: 24px;
+      background: var(--surface);
+      box-shadow: var(--shadow);
+      transform: translateY(14px) scale(0.98);
+      transition: transform 180ms ease;
+    }
+
+    .dialog-backdrop.open .dialog { transform: translateY(0) scale(1); }
+
+    .dialog-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; }
+    .dialog-eyebrow { margin: 0 0 4px; color: var(--blue); font-size: 12px; font-weight: 750; letter-spacing: 0.08em; text-transform: uppercase; }
+    .dialog-title { margin: 0; font-size: 23px; font-weight: 650; text-transform: capitalize; }
+
+    .close-btn { margin-top: -6px; margin-right: -6px; font-size: 22px; }
+
+    .field-label { display: block; margin: 23px 0 8px; color: var(--muted); font-size: 13px; font-weight: 650; }
+
+    textarea {
+      width: 100%;
+      min-height: 155px;
+      max-height: 45vh;
+      resize: vertical;
+      border: 1px solid #cdd1d6;
+      border-radius: 12px;
+      padding: 13px 14px;
+      color: var(--ink);
+      background: #fbfcfe;
+      line-height: 1.5;
+      outline: none;
+    }
+
+    textarea:focus { border-color: var(--blue); background: white; box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.12); }
+
+    .char-counter { margin-top: 6px; color: #8a8f98; font-size: 12px; text-align: right; }
+
+    .dialog-actions { margin-top: 20px; display: flex; align-items: center; justify-content: flex-end; gap: 9px; }
+    .btn-primary { color: white; border-color: var(--blue); background: var(--blue); font-weight: 650; }
+    .btn-primary:hover { border-color: var(--blue-dark); background: var(--blue-dark); }
+    .btn-danger { margin-right: auto; color: var(--red); border-color: transparent; background: transparent; }
+    .btn-danger:hover { color: #b3261e; border-color: transparent; background: #fce8e6; }
+    .btn-danger[hidden] { display: none; }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 24px;
+      z-index: 30;
+      padding: 11px 17px;
+      border-radius: 10px;
+      color: white;
+      background: #303134;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.22);
+      font-size: 14px;
+      opacity: 0;
+      pointer-events: none;
+      transform: translate(-50%, 12px);
+      transition: opacity 170ms ease, transform 170ms ease;
+    }
+
+    .toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+    @media (max-width: 760px) {
+      .app { padding: 12px; gap: 12px; }
+      .topbar { flex-wrap: wrap; gap: 9px; }
+      .brand { min-width: auto; flex: 1; }
+      .brand-mark { width: 36px; height: 36px; }
+      .brand-text { font-size: 18px; }
+      .toolbar { order: 2; flex-basis: 100%; }
+      .storage-badge { display: none; }
+      .month-title { min-width: 0; flex: 1; margin-left: 4px; font-size: 20px; }
+      .btn { height: 38px; padding: 0 12px; }
+      .icon-btn { width: 36px; height: 36px; }
+      .calendar-shell { min-height: 650px; border-radius: 13px; }
+      .calendar-grid { min-height: 605px; }
+      .weekday.full { display: none; }
+      .weekday.short { display: grid; }
+      .day { padding: 4px; }
+      .day-number { width: 27px; height: 27px; font-size: 12px; }
+      .note-preview { margin-top: 4px; padding: 5px 4px; border-left-width: 2px; font-size: 10px; -webkit-line-clamp: 4; }
+    }
+
+    @media (max-width: 430px) {
+      .brand-text span { display: none; }
+      .calendar-shell { min-height: 590px; }
+      .calendar-grid { min-height: 545px; grid-template-rows: repeat(6, minmax(84px, 1fr)); }
+      .dialog { padding: 20px; }
+      .dialog-actions { flex-wrap: wrap; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition-duration: 0.01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="topbar">
+      <div class="brand" aria-label="Il mio calendario">
+        <div class="brand-mark" aria-hidden="true">31</div>
+        <div class="brand-text">Il mio <span>calendario</span></div>
+      </div>
+
+      <div class="toolbar" aria-label="Navigazione calendario">
+        <button class="btn" id="todayBtn" type="button">Oggi</button>
+        <button class="icon-btn" id="prevBtn" type="button" aria-label="Mese precedente">‹</button>
+        <button class="icon-btn" id="nextBtn" type="button" aria-label="Mese successivo">›</button>
+        <h1 class="month-title" id="monthTitle" aria-live="polite"></h1>
+      </div>
+
+      <div class="storage-badge" title="Le note restano salvate su questo dispositivo">
+        <span class="storage-dot" aria-hidden="true"></span>
+        Salvato in locale
+      </div>
+    </header>
+
+    <section class="calendar-shell" aria-label="Calendario mensile">
+      <div class="weekdays" aria-hidden="true">
+        <div class="weekday full">Lunedì</div><div class="weekday short">Lun</div>
+        <div class="weekday full">Martedì</div><div class="weekday short">Mar</div>
+        <div class="weekday full">Mercoledì</div><div class="weekday short">Mer</div>
+        <div class="weekday full">Giovedì</div><div class="weekday short">Gio</div>
+        <div class="weekday full">Venerdì</div><div class="weekday short">Ven</div>
+        <div class="weekday full">Sabato</div><div class="weekday short">Sab</div>
+        <div class="weekday full">Domenica</div><div class="weekday short">Dom</div>
+      </div>
+      <div class="calendar-grid" id="calendarGrid"></div>
+    </section>
+  </main>
+
+  <div class="dialog-backdrop" id="dialogBackdrop" role="presentation">
+    <section class="dialog" role="dialog" aria-modal="true" aria-labelledby="dialogTitle">
+      <div class="dialog-header">
+        <div>
+          <p class="dialog-eyebrow">Nota del giorno</p>
+          <h2 class="dialog-title" id="dialogTitle"></h2>
+        </div>
+        <button class="icon-btn close-btn" id="closeBtn" type="button" aria-label="Chiudi">×</button>
+      </div>
+
+      <label class="field-label" for="noteInput">Cosa vuoi ricordare?</label>
+      <textarea id="noteInput" maxlength="500" placeholder="Scrivi qui la tua nota..."></textarea>
+      <div class="char-counter"><span id="charCount">0</span>/500</div>
+
+      <div class="dialog-actions">
+        <button class="btn btn-danger" id="deleteBtn" type="button" hidden>Elimina</button>
+        <button class="btn" id="cancelBtn" type="button">Annulla</button>
+        <button class="btn btn-primary" id="saveBtn" type="button">Salva nota</button>
+      </div>
+    </section>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    (() => {
+      'use strict';
+
+      const STORAGE_KEY = 'calendario-note-v1';
+      const monthTitle = document.getElementById('monthTitle');
+      const calendarGrid = document.getElementById('calendarGrid');
+      const dialogBackdrop = document.getElementById('dialogBackdrop');
+      const dialogTitle = document.getElementById('dialogTitle');
+      const noteInput = document.getElementById('noteInput');
+      const charCount = document.getElementById('charCount');
+      const deleteBtn = document.getElementById('deleteBtn');
+      const toast = document.getElementById('toast');
+
+      const now = new Date();
+      let visibleDate = new Date(now.getFullYear(), now.getMonth(), 1);
+      let selectedKey = null;
+      let lastFocusedElement = null;
+      let toastTimer = null;
+
+      const monthFormatter = new Intl.DateTimeFormat('it-IT', { month: 'long', year: 'numeric' });
+      const fullDateFormatter = new Intl.DateTimeFormat('it-IT', {
+        weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+      });
+
+      function loadNotes() {
+        try {
+          const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+          return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : {};
+        } catch (error) {
+          console.warn('Impossibile leggere le note salvate.', error);
+          return {};
+        }
+      }
+
+      let notes = loadNotes();
+
+      function saveNotes() {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(notes));
+          return true;
+        } catch (error) {
+          console.error('Impossibile salvare le note.', error);
+          showToast('Spazio di salvataggio non disponibile');
+          return false;
+        }
+      }
+
+      function dateKey(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+      }
+
+      function dateFromKey(key) {
+        const [year, month, day] = key.split('-').map(Number);
+        return new Date(year, month - 1, day);
+      }
+
+      function isSameDay(a, b) {
+        return a.getFullYear() === b.getFullYear() &&
+          a.getMonth() === b.getMonth() &&
+          a.getDate() === b.getDate();
+      }
+
+      function renderCalendar() {
+        const year = visibleDate.getFullYear();
+        const month = visibleDate.getMonth();
+        monthTitle.textContent = monthFormatter.format(visibleDate);
+        calendarGrid.replaceChildren();
+
+        const firstDay = new Date(year, month, 1);
+        const mondayOffset = (firstDay.getDay() + 6) % 7;
+        const gridStart = new Date(year, month, 1 - mondayOffset);
+        const fragment = document.createDocumentFragment();
+
+        for (let index = 0; index < 42; index++) {
+          const date = new Date(gridStart);
+          date.setDate(gridStart.getDate() + index);
+          const key = dateKey(date);
+          const note = notes[key] || '';
+          const button = document.createElement('button');
+          button.type = 'button';
+          button.className = 'day';
+          button.dataset.date = key;
+
+          if (date.getMonth() !== month) button.classList.add('outside');
+          if (isSameDay(date, now)) button.classList.add('today');
+
+          const accessibleDate = fullDateFormatter.format(date);
+          button.setAttribute('aria-label', note ? `${accessibleDate}. Nota: ${note}` : `${accessibleDate}. Aggiungi una nota`);
+
+          const dayHead = document.createElement('div');
+          dayHead.className = 'day-head';
+          const dayNumber = document.createElement('span');
+          dayNumber.className = 'day-number';
+          dayNumber.textContent = date.getDate();
+          dayHead.appendChild(dayNumber);
+
+          if (note) {
+            const dot = document.createElement('span');
+            dot.className = 'note-count';
+            dot.setAttribute('aria-hidden', 'true');
+            dayHead.appendChild(dot);
+
+            const preview = document.createElement('div');
+            preview.className = 'note-preview';
+            preview.textContent = note;
+            button.append(dayHead, preview);
+          } else {
+            button.appendChild(dayHead);
+          }
+
+          fragment.appendChild(button);
+        }
+
+        calendarGrid.appendChild(fragment);
+      }
+
+      function openDialog(key, trigger) {
+        selectedKey = key;
+        lastFocusedElement = trigger || document.activeElement;
+        const selectedDate = dateFromKey(key);
+        const existingNote = notes[key] || '';
+        dialogTitle.textContent = fullDateFormatter.format(selectedDate);
+        noteInput.value = existingNote;
+        charCount.textContent = existingNote.length;
+        deleteBtn.hidden = !existingNote;
+        dialogBackdrop.classList.add('open');
+        document.body.style.overflow = 'hidden';
+        window.setTimeout(() => noteInput.focus(), 80);
+      }
+
+      function closeDialog() {
+        dialogBackdrop.classList.remove('open');
+        document.body.style.overflow = '';
+        selectedKey = null;
+        if (lastFocusedElement && document.contains(lastFocusedElement)) lastFocusedElement.focus();
+      }
+
+      function showToast(message) {
+        window.clearTimeout(toastTimer);
+        toast.textContent = message;
+        toast.classList.add('show');
+        toastTimer = window.setTimeout(() => toast.classList.remove('show'), 2200);
+      }
+
+      function saveCurrentNote() {
+        if (!selectedKey) return;
+        const value = noteInput.value.trim();
+        if (value) notes[selectedKey] = value;
+        else delete notes[selectedKey];
+
+        if (saveNotes()) {
+          renderCalendar();
+          closeDialog();
+          showToast(value ? 'Nota salvata' : 'Nota rimossa');
+        }
+      }
+
+      function deleteCurrentNote() {
+        if (!selectedKey || !notes[selectedKey]) return;
+        delete notes[selectedKey];
+        if (saveNotes()) {
+          renderCalendar();
+          closeDialog();
+          showToast('Nota eliminata');
+        }
+      }
+
+      calendarGrid.addEventListener('click', (event) => {
+        const day = event.target.closest('.day');
+        if (!day) return;
+        openDialog(day.dataset.date, day);
+      });
+
+      document.getElementById('prevBtn').addEventListener('click', () => {
+        visibleDate = new Date(visibleDate.getFullYear(), visibleDate.getMonth() - 1, 1);
+        renderCalendar();
+      });
+
+      document.getElementById('nextBtn').addEventListener('click', () => {
+        visibleDate = new Date(visibleDate.getFullYear(), visibleDate.getMonth() + 1, 1);
+        renderCalendar();
+      });
+
+      document.getElementById('todayBtn').addEventListener('click', () => {
+        visibleDate = new Date(now.getFullYear(), now.getMonth(), 1);
+        renderCalendar();
+        const todayCell = calendarGrid.querySelector(`[data-date="${dateKey(now)}"]`);
+        if (todayCell) todayCell.focus();
+      });
+
+      document.getElementById('saveBtn').addEventListener('click', saveCurrentNote);
+      document.getElementById('deleteBtn').addEventListener('click', deleteCurrentNote);
+      document.getElementById('cancelBtn').addEventListener('click', closeDialog);
+      document.getElementById('closeBtn').addEventListener('click', closeDialog);
+
+      noteInput.addEventListener('input', () => {
+        charCount.textContent = noteInput.value.length;
+      });
+
+      noteInput.addEventListener('keydown', (event) => {
+        if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') saveCurrentNote();
+      });
+
+      dialogBackdrop.addEventListener('click', (event) => {
+        if (event.target === dialogBackdrop) closeDialog();
+      });
+
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && dialogBackdrop.classList.contains('open')) closeDialog();
+      });
+
+      renderCalendar();
+    })();
+  </script>
+</body>
+</html>
