@@ -55,12 +55,14 @@ I dati non vengono sincronizzati tra browser o dispositivi. La cancellazione dei
 
 ```text
 .
-|-- index.html   # HTML, CSS e JavaScript dell'applicazione
+|-- index.html   # struttura HTML dell'applicazione
+|-- styles.css   # stili, layout responsive e animazioni
+|-- app.js       # logica del calendario e persistenza locale
 |-- AGENTS.md    # contesto e indicazioni per gli agenti di sviluppo
 `-- README.md    # documentazione del progetto
 ```
 
-L'applicazione è racchiusa in una IIFE JavaScript e non espone variabili globali. La griglia contiene sempre 42 celle, così da coprire sei settimane complete; i giorni esterni al mese visibile sono mostrati con uno stile attenuato ma restano selezionabili.
+L'applicazione resta priva di dipendenze e non richiede una fase di build. La logica in `app.js` è racchiusa in una IIFE e non espone variabili globali. La griglia contiene sempre 42 celle, così da coprire sei settimane complete; i giorni esterni al mese visibile sono mostrati con uno stile attenuato ma restano selezionabili.
 
 ## Tecnologie
 
